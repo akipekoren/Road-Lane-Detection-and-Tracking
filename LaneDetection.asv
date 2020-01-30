@@ -1,0 +1,22 @@
+function [ frame ] = LaneDetection( frame )
+    
+    % Processing image to get all lines in ROI.
+    image_gray = checkrgb(frame);
+    image_binarize = binarize(image_gray);
+    image_gauss = gaussfilt(image_binarize);
+    image_sobel = edge(image_gauss,'sobel');
+    image_mask = mask(image_sobel);
+    image_line = hough_lines(image_mask);
+    
+    [leftLines, rightLines] = determine_slope(image_line);
+      
+    % Get the equations of the resulting lines
+    rightLane = line_equation(rightLines);
+    leftLane = line_equation(leftLines);
+      
+        frame = insertShape(frame, 'Line', [ line.point1(1) line.point1(2) line.point2(1) line.point2(2)], 'LineWidth', 9, 'Color', 'cyan');
+
+    frame = draw_line(frame, leftLane);
+    frame = draw_line(frame, rightLane);
+    
+end
